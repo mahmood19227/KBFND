@@ -7,7 +7,7 @@ from pymongo import MongoClient
 #It will be running throughout the evaluation time
 #In case there are any issues, you might want to run you own
 #CoreNLP server and replace the address here
-MongoHost = '35.227.120.108'
+MongoHost = '127.0.0.1'
 MongoPort = 27017
 
 client = MongoClient('mongodb://'+MongoHost+':'+str(MongoPort)+'/test')

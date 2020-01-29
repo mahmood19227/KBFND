@@ -2,7 +2,8 @@ import nltk
 from pycorenlp import *
 import collections
 import pprint
-from neuralcoref import Coref
+import spacy
+import neuralcoref
 import re
 import pprint
 from nltk import word_tokenize, pos_tag
@@ -10,6 +11,7 @@ from nltk.stem import WordNetLemmatizer
 from models import db
 import csv
 import os
+import spacy
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -19,7 +21,9 @@ suffixes = "(Inc|Ltd|Jr|Sr|Co)"
 starters = "(Mr|Mrs|Ms|Dr|He\s|She\s|It\s|They\s|Their\s|Our\s|We\s|But\s|However\s|That\s|This\s|Wherever)"
 acronyms = "([A-Z][.][A-Z][.](?:[A-Z][.])?)"
 websites = "[.](com|net|org|io|gov)"
-coref = Coref()
+nlp = spacy.load('en_core_web_sm')
+neuralcoref.add_to_pipe(nlp)
+
 
 #Make sure sentence is in good format.
 #Source code from: https://stackoverflow.com/questions/4576077/python-split-text-on-sentences/9047421#9047421 
@@ -56,12 +60,16 @@ def neuralcorefIt(text):
 	for s in sentences:
 		if s[-1] == '?':
 			sentences.remove(s)
-	for i in range(1,len(sentences)):
-		clusters = coref.one_shot_coref(utterances=sentences[i], context=sentences[i - 1])
-		resolved_utterance_text = coref.get_resolved_utterances()
-		sentences[i] = resolved_utterance_text[0].capitalize()
+	text = ' '.join(sentences)
+	doc = nlp(text)
+	text = doc._.coref_resolved
+	return text;
+	#for i in range(1,len(sentences)):
+	#	clusters = coref.one_shot_coref(utterances=sentences[i], context=sentences[i - 1])
+	#	resolved_utterance_text = coref.get_resolved_utterances()
+	#	sentences[i] = resolved_utterance_text[0].capitalize()
 		# print(resolved_utterance_text)
-	return ' '.join(sentences)
+	#return ' '.join(sentences)
 
 #Get present tense of verbs in triples using WordNetLemmatizer
 def getPresentTense(triples):
@@ -81,7 +89,7 @@ def produceTriples(text):
 	#It will be running throughout the evaluation time
 	#In case there are any issues, you might want to run you own
 	#CoreNLP server and replace the address here
-	nlp=StanfordCoreNLP("http://35.227.120.108:9000/")
+	nlp=StanfordCoreNLP("http://127.0.0.1:9000/")
 
 	output = nlp.annotate(processedText, properties={"annotators":"tokenize,ssplit,pos,lemma,depparse,natlog,openie,dcoref",
 	                                 "outputFormat": "json","triple.strict":"true"})#, "openie.max_entailments_per_clause":"1"})

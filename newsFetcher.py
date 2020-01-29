@@ -24,7 +24,7 @@ def returnCoolHTML(url):
             time.sleep(1.2)
             continue
         break
-    data=BeautifulSoup(req.text,"html5lib")
+    data=BeautifulSoup(req.text,"html.parser")
     req.close()
     return data
 
@@ -152,8 +152,8 @@ def getIndependentNews():
 
 #Fetch articles from all four sources one by one
 def fetchAll():
-	getBBCArticle()
-	getGuardianNews()
+	#getBBCArticle()
+	#getGuardianNews()
 	getSkyNews()
 	getIndependentNews()
 
